@@ -6,13 +6,14 @@ const Home = ({ userObj }) => {
     const [tweets, setTweets] = useState([]);
 
     useEffect(() => {
-        dbService.collection('tweets').onSnapshot(snapshot => {
+        const listener = dbService.collection('tweets').onSnapshot(snapshot => {
             const tweetArray = snapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
             }));
             setTweets(tweetArray);
         })
+        return () => listener();
     }, [])
 
     const onSubmit = async (event) => {
