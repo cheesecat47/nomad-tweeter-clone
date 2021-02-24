@@ -11,7 +11,12 @@ function App() {
     authService.onAuthStateChanged((user) => {
       if (user) {
         setIsLoggedIn(true);
-        setUserObj(user);
+        // setUserObj(user); // too big
+        setUserObj({
+          displayName: user.displayName,
+          uid: user.uid,
+          updateProfile: (args) => user.updateProfile(args),
+        })
       } else {
         setIsLoggedIn(false);
       }
@@ -19,12 +24,31 @@ function App() {
     });
   }, []);
 
+  const refreshUser = () => {
+    const user = authService.currentUser;
+    setUserObj({
+      displayName: user.displayName,
+      uid: user.uid,
+      updateProfile: (args) => user.updateProfile(args),
+    });
+    // setUserObj(Object.assign({}, user));
+  }
+
   return (
     <>
-      {init ? <AppRouter isLoggedIn={isLoggedIn} userObj={userObj} /> : "Initializing..."}
+      {init ? (
+        <AppRouter
+          isLoggedIn={isLoggedIn}
+          userObj={userObj}
+          refreshUser={refreshUser}
+        />
+      ) : (
+          "Initializing..."
+        )
+      }
       {/* <footer>&copy; {new Date().getFullYear()} nomad-tweeter-clone</footer> */}
     </>
   );
 }
- 
+
 export default App;
