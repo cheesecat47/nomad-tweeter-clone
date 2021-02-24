@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 const Home = ({ userObj }) => {
     const [tweet, setTweet] = useState("");
     const [tweets, setTweets] = useState([]);
-    const [attachment, setAttachment] = useState();
+    const [attachment, setAttachment] = useState("");
 
     useEffect(() => {
         const listener = dbService.collection('tweets')
@@ -23,15 +23,21 @@ const Home = ({ userObj }) => {
 
     const onSubmit = async (event) => {
         event.preventDefault();
-        const fileRef = storageService.ref().child(`${userObj.uid}/${uuidv4()}`);
-        const response = await fileRef.putString(attachment, "data_url");
-        console.log(response);
-        // await dbService.collection("tweets").add({
-        //     text: tweet,
-        //     creatorId: userObj.uid,
-        //     createdAt: Date.now(),
-        // });
-        // setTweet("");
+        let attachmentURL = "";
+        if (attachment !== "") {
+            const attachmentRef = storageService.ref().child(`${userObj.uid}/${uuidv4()}`);
+            const response = await attachmentRef.putString(attachment, "data_url");
+            attachmentURL = await response.ref.getDownloadURL();
+        }
+        const tweetObj = {
+            text: tweet,
+            attachmentURL,
+            creatorId: userObj.uid,
+            createdAt: Date.now(),
+        }
+        await dbService.collection("tweets").add(tweetObj);
+        setTweet("");
+        setAttachment("");
     };
     const onChange = (event) => {
         const { target: { value } } = event;
@@ -49,7 +55,7 @@ const Home = ({ userObj }) => {
         reader.readAsDataURL(picture);
     }
 
-    const onClearAttachment = () => setAttachment(null);
+    const onClearAttachment = () => setAttachment("");
 
     return (
         <div>
@@ -59,7 +65,7 @@ const Home = ({ userObj }) => {
                 <input type="submit" value="tweet" />
                 {attachment && (
                     <div>
-                        <img src={attachment} width="50px" height="50px" />
+                        <img src={attachment} alt="attachment" width="50px" height="50px" />
                         <button onClick={onClearAttachment}>Clear</button>
                     </div>
                 )}
