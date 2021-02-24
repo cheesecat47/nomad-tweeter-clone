@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { authService, dbService } from '../fbase';
 
 const Profile = ({ userObj }) => {
@@ -17,8 +17,27 @@ const Profile = ({ userObj }) => {
         getMyTweets();
     }, [])
 
+    const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
+    const onChange = (event) => {
+        const { target: { value}} = event;
+        setNewDisplayName(value);
+    };
+    const onSubmit = async (event) => {
+        event.preventDefault();
+        if (userObj.displayName !== newDisplayName) {
+            await userObj.updateProfile({
+                displayName: newDisplayName
+            });
+        };
+    }
+
     return (
         <>
+            <form onSubmit={onSubmit}>
+                <input type="text" placeholder="Display name" 
+                    onChange={onChange} value={newDisplayName} />
+                <input type="submit" value="Update Profile" />
+            </form>
             <button onClick={onLogOutClick}>Log Out</button>
         </>
     )
