@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { dbService } from '../fbase';
+import { dbService, storageService } from '../fbase';
 import Tweet from '../components/Tweet'
+import { v4 as uuidv4 } from 'uuid';
 
 const Home = ({ userObj }) => {
     const [tweet, setTweet] = useState("");
@@ -22,12 +23,15 @@ const Home = ({ userObj }) => {
 
     const onSubmit = async (event) => {
         event.preventDefault();
-        await dbService.collection("tweets").add({
-            text: tweet,
-            creatorId: userObj.uid,
-            createdAt: Date.now(),
-        });
-        setTweet("");
+        const fileRef = storageService.ref().child(`${userObj.uid}/${uuidv4()}`);
+        const response = await fileRef.putString(attachment, "data_url");
+        console.log(response);
+        // await dbService.collection("tweets").add({
+        //     text: tweet,
+        //     creatorId: userObj.uid,
+        //     createdAt: Date.now(),
+        // });
+        // setTweet("");
     };
     const onChange = (event) => {
         const { target: { value } } = event;
@@ -39,7 +43,7 @@ const Home = ({ userObj }) => {
 
         const reader = new FileReader();
         reader.onloadend = (finishedEvent) => {
-            const {currentTarget: {result}} = finishedEvent;
+            const { currentTarget: { result } } = finishedEvent;
             setAttachment(result);
         }
         reader.readAsDataURL(picture);
@@ -54,10 +58,10 @@ const Home = ({ userObj }) => {
                 <input type="file" accept="image/*" onChange={onFileChange} />
                 <input type="submit" value="tweet" />
                 {attachment && (
-                <div>
-                    <img src={attachment} width="50px" height="50px" />
-                    <button onClick={onClearAttachment}>Clear</button>
-                </div>
+                    <div>
+                        <img src={attachment} width="50px" height="50px" />
+                        <button onClick={onClearAttachment}>Clear</button>
+                    </div>
                 )}
             </form>
             <div>
