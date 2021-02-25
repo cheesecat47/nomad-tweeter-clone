@@ -1,6 +1,8 @@
 import { authService, fbinstance } from '../fbase';
-import React from 'react';
+import { faTwitter, faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AuthForm from '../components/AuthForm';
+import React from 'react';
 
 const Auth = () => {
     const onSocialClick = async (event) => {
@@ -13,17 +15,31 @@ const Auth = () => {
             provider = new fbinstance.auth.GithubAuthProvider();
         }
 
-        const data = await authService.signInWithPopup(provider);
-        console.log(data);
+        await authService.signInWithPopup(provider);
     }
 
     return (
-        <div>
+        <div className="authContainer">
+            <FontAwesomeIcon icon={faTwitter}
+                color={"#04AAFF"}
+                size="3x"
+                style={{ marginBottom: 30 }} />
+
             <AuthForm />
 
-            <div>
-                <button name="google" onClick={onSocialClick}>Continue with Google</button>
-                <button name="github" onClick={onSocialClick}>Continue with GitHub</button>
+            <div className="authBtns">
+                <button
+                    name="google"
+                    className="authBtn"
+                    onClick={onSocialClick}>
+                    <FontAwesomeIcon icon={faGoogle} /> Continue with Google
+                </button>
+                <button
+                    name="github"
+                    className="authBtn"
+                    onClick={onSocialClick}>
+                    <FontAwesomeIcon icon={faGithub} /> Continue with GitHub
+                </button>
             </div>
         </div>)
 };
